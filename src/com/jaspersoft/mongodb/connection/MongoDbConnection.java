@@ -61,6 +61,7 @@ public class MongoDbConnection implements Connection {
 	private final String username;
 	private final String password;
 	private String mongoDatabaseName;
+        private final boolean doClose;
 
 	private DB mongoDatabase;
 
@@ -84,9 +85,19 @@ public class MongoDbConnection implements Connection {
 		this.mongoURI = mongoURI;
 		this.username = username;
 		this.password = password;
+                this.doClose = true;
 		create(mongoURI);
 		setDatabase();
 	}
+        
+        public MongoDbConnection( DB database) throws JRException {
+            this.mongoURI = null;
+            this.username = null;
+            this.password = null;
+            this.doClose = false;
+            
+            this.mongoDatabase = database;
+        }
 
 	private void create(String mongoURI) throws JRException {
 		close();
@@ -153,11 +164,13 @@ public class MongoDbConnection implements Connection {
 
 	@Override
 	public void close() {
+            if( doClose) {
 		mongoDatabaseName = null;
 		if (client != null) {
 			client.close();
 			client = null;
 		}
+            }
 	}
 
 	@Override
